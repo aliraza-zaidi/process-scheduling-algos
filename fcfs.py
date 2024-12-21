@@ -1,6 +1,6 @@
 import pandas as pd
 
-queue= []
+
 n = int(input('Enter the number of processes: '))
 
 p = [i for i in range(n)]
