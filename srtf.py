@@ -2,48 +2,50 @@ import pandas as pd
 import heapq
 
 class Process:
-    def __init__ (self, at, bt):
+    def __init__ (self, pid, at, bt, ft=0):
+        self.pid = pid
         self.at = at 
         self.bt = bt 
-    
-class PriorityQueue:
-    def __init__(self):
-        self.queue = []
-    
-    def enqueue(self, x):
-        heapq.heappush(self.queue, (x.bt, x))
-
-    def dequeue(self):        
-        return heapq.heappop(self.queue)[1]    
-    
-    def is_empty(self):
-        return len(self.queue) == 0
-    
+        self.ft = ft
 n = int(input('Enter the number of processes: '))
 
 p = [i for i in range(n)]
-queue = PriorityQueue()
+queue = []
 
 for i in range (n):
     at = int(input(f'Enter Arrival Time for P{i}: '))
     bt = int(input(f'Enter Burst Time for P{i}: '))    
-    queue.enqueue(Process(at, bt))
+    queue.enqueue(Process(i, at, bt))
 
 save_queue = queue.queue.copy()
 
+
+def scan_queue (t, q):            
+    valid = filter(lambda x: (x.at <= t) and (x.bt != 0), q)
+    if len(valid) == 1:
+        return valid[0].pid
+    else:
+        srt = filter(lambda x, y: min(x.bt, y.bt) and (x.bt != 0) and (y.bt != 0), q)
+        return srt[0].pid
+
+def update_bt (q, pid):
+    for i in range (len(q)):
+        if pid == q[i].pid:
+            q[i].bt -= 1
+            return q
+
+def update_queue (q, ft, t):
+    for i in range (len(q)):
+        if q[i].bt == 0:
+            f = q.pop(i)
+            f[i].ft = t
+            ft.append(f)
+            return q, ft
+
 t = 0
 ft = []
-
-for i in range (n):
-    p = queue.dequeue()
-    while p.bt != 0:
-        t += 1
-        p.bt -= 1
-        srt = queue.dequeue()
-        if srt.bt < p.bt:
-            queue.enqueue(p)            
-            break
-        else:
-            queue.enqueue(srt)
-    ft.append(t)
-       
+while queue:
+    p = scan_queue(queue, t)
+    queue = update_bt(queue, p)
+    queue, ft = update_queue(queue, ft, t)
+    t += 1
