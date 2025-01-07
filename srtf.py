@@ -1,5 +1,4 @@
 import pandas as pd
-import heapq
 
 class Process:
     def __init__ (self, pid, at, bt, ft=0):
